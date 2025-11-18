@@ -30,7 +30,7 @@ services:
       MAAS_DB_NAME: maasdb
       MAAS_DB_USER: maas
       MAAS_DB_PASSWORD: maaspass
-      MAAS_URL: "http://localhost:5240/MAAS/"
+      MAAS_URL: "http://0.0.0.0:5240/MAAS/"
       MAAS_ADMIN_USERNAME: admin
       MAAS_ADMIN_PASSWORD: admin
       MAAS_ADMIN_EMAIL: "admin@example.com"

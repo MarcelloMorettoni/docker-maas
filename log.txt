@@ -1,0 +1,133 @@
+[+] Running 2/2
+ ✔ Container maas-db  Healthy                                                                                           11.2s 
+ ✔ Container maas     Started                                                                                           11.7s 
+(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ docker logs -f maas
+🔧 Writing /etc/maas/regiond.conf from env...
+⏳ Waiting for PostgreSQL at db:5432...
+✔ PostgreSQL is ready
+⚙ Running MAAS DB migrations...
+Operations to perform:
+  Apply all migrations: auth, contenttypes, maasserver, metadataserver, piston3, sessions, sites
+Running migrations:
+  No migrations to apply.
+🌐 Generating MAAS Nginx Configuration...
+🎨 Installing Static Files (Manual Fallback)...
+⚠ Warning: Could not find maasserver static files.
+✔ Static files installed to /usr/share/maas/web/static
+👤 Ensuring admin user exists...
+usage: maas [-h] COMMAND ...
+
+options:
+  -h, --help      show this help message and exit
+
+drill down:
+  COMMAND
+    login         Log in to a remote API, and remember its description and
+                  credentials.
+    logout        Log out of a remote API, purging any stored credentials.
+    list          List remote APIs that have been logged-in to.
+    refresh       Refresh the API descriptions of all profiles.
+    init          Initialize controller.
+    apikey        Used to manage a user's API keys. Shows existing keys unless
+                  --generate or --delete is passed.
+    configauth    Configure external authentication.
+    config-tls    Configure MAAS Region TLS.
+    config-vault  Configure MAAS Region Vault integration.
+    createadmin   Create a MAAS administrator account.
+    changepassword
+                  Change a MAAS user's password.
+
+https://maas.io/
+
+duplicate key value violates unique constraint "auth_user_email_1c89df09_uniq"
+DETAIL:  Key (email)=(admin@example.com) already exists.
+
+🚀 Starting supervisord...
+/usr/lib/python3/dist-packages/supervisor/options.py:473: UserWarning: Supervisord is running as root and it is searching for its configuration file in default locations (including its current working directory); you probably want to specify a "-c" argument specifying an absolute path to a configuration file for improved security.
+  self.warnings.warn(
+2025-11-18 16:52:05,253 INFO Included extra file "/etc/supervisor/conf.d/maas.conf" during parsing
+2025-11-18 16:52:05,253 INFO Set uid to user 0 succeeded
+2025-11-18 16:52:05,256 INFO RPC interface 'supervisor' initialized
+2025-11-18 16:52:05,256 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2025-11-18 16:52:05,257 INFO supervisord started with pid 1
+2025-11-18 16:52:06,260 INFO spawned: 'bind9' with pid 17
+2025-11-18 16:52:06,271 INFO spawned: 'chrony' with pid 20
+2025-11-18 16:52:06,286 INFO spawned: 'nginx' with pid 22
+2025-11-18 16:52:06,291 INFO spawned: 'rackd' with pid 24
+2025-11-18 16:52:06,313 INFO spawned: 'regiond' with pid 25
+2025-11-18 16:52:09,439 INFO success: chrony entered RUNNING state, process has stayed up for > than 3 seconds (startsecs)
+2025-11-18 16:52:09,439 INFO success: nginx entered RUNNING state, process has stayed up for > than 3 seconds (startsecs)
+2025-11-18 16:52:11,840 INFO success: bind9 entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+^C(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ docker exec maas ss -tulpn | grep 5240
+(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ docker exec -it maas bash
+root@dae60f735f5a:/#   tail -n 30 /var/log/maas/regiond.log
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:arm64:hwe-24.04-edge: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:arm64:hwe-24.04-lowlatency: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:arm64:hwe-24.04-lowlatency-edge: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:armhf:ga-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:armhf:hwe-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:armhf:hwe-24.04-edge: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:ppc64el:ga-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:ppc64el:hwe-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:ppc64el:hwe-24.04-edge: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:s390x:ga-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:s390x:hwe-24.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.04:s390x:hwe-24.04-edge: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:amd64:ga-24.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:amd64:ga-24.10-lowlatency: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:arm64:ga-24.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:armhf:ga-24.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:ppc64el:ga-24.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:24.10:s390x:ga-24.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:amd64:ga-25.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:amd64:ga-25.04-lowlatency: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:arm64:ga-25.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:armhf:ga-25.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:ppc64el:ga-25.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.04:s390x:ga-25.04: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.10:amd64:ga-25.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.10:arm64:ga-25.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.10:armhf:ga-25.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.10:ppc64el:ga-25.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 sstreams: [info] com.ubuntu.maas:stable:v3:download/com.ubuntu.maas.stable:v3:boot:25.10:s390x:ga-25.10: to_add=[] to_remove=[]
+2025-11-18 16:52:10 maasserver.region_controller: [info] Reloaded DNS configuration; regiond started.
+root@dae60f735f5a:/# curl http://localhost:5240/MAAS/
+curl: (7) Failed to connect to localhost port 5240 after 0 ms: Connection refused
+root@dae60f735f5a:/# curl http://localhost/MAAS/
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.18.0 (Ubuntu)</center>
+</body>
+</html>
+root@dae60f735f5a:/# maas-region rack_controllers
+Unknown command: 'rack_controllers'
+Type 'maas-region help' for usage.
+root@dae60f735f5a:/# 
+
+(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ docker exec maas cat /tmp/systemctl_mock.log | grep "maas-http"
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:29 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:30 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:30 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:30 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:35 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:35 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:35 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:40 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:40 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:40 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:45 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+Tue Nov 18 16:56:45 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: start maas-http
+Tue Nov 18 16:56:45 UTC 2025 - SYSTEMCTL MOCK CALLED BY root: status maas-http
+(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ docker exec maas curl http://localhost:5240/MAAS/
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 5240 after 0 ms: Connection refused
+(base) nibble@DESKTOP-S2OIHTC:~/docker-maas$ 

@@ -2,15 +2,41 @@
 # Log execution for debugging
 echo "$(date) - SYSTEMCTL MOCK CALLED BY $(whoami): $@" >> /tmp/systemctl_mock.log
 
-# If MAAS asks for 'show' OR 'status', return "active" with all required fields
-if [[ "$*" == *"show"* ]] || [[ "$*" == *"status"* ]]; then
-    echo "ActiveState=active"
-    echo "SubState=running"
-    echo "MainPID=$$"
-    echo "LoadState=loaded"
-    echo "UnitFileState=enabled"
+SERVICE="$2"
+
+# 1. Define services we MUST pretend are running
+#    - bind9/named: DNS
+#    - chrony: Time
+#    - maas-proxy: Squid (The one that caused the crash loop)
+#    - maas-syslog: Logging
+if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog) ]]; then
+    if [[ "$*" == *"show"* ]]; then
+        echo "ActiveState=active"
+        echo "SubState=running"
+        echo "MainPID=$$"
+        echo "LoadState=loaded"
+        echo "UnitFileState=enabled"
+    elif [[ "$*" == *"status"* ]]; then
+        echo "● $SERVICE.service - Mock Service"
+        echo "   Loaded: loaded"
+        echo "   Active: active (running)"
+        echo " Main PID: $$"
+    fi
     exit 0
 fi
 
-# If MAAS tries to restart/reload, just return success
+# 2. For everything else (like maas-http), report INACTIVE.
+#    This forces regiond to bind the socket itself instead of waiting for systemd.
+if [[ "$*" == *"show"* ]]; then
+    echo "ActiveState=inactive"
+    echo "SubState=dead"
+    echo "LoadState=loaded"
+    echo "UnitFileState=disabled"
+elif [[ "$*" == *"status"* ]]; then
+    echo "● $SERVICE.service"
+    echo "   Loaded: loaded"
+    echo "   Active: inactive (dead)"
+fi
+
+# Always return success (0) to prevent crashes, even if inactive
 exit 0
