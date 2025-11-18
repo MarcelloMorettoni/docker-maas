@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:14
+    container_name: maas-db
+    environment:
+      POSTGRES_DB: maasdb
+      POSTGRES_USER: maas
+      POSTGRES_PASSWORD: maaspass
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maas -d maasdb || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  maas:
+    build: .
+    image: my-maas:3.3
+    container_name: maas
+    privileged: true        # MAAS likes to poke at networking; fine for a lab
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5240:5240"
+    environment:
+      MAAS_DB_HOST: db
+      MAAS_DB_PORT: 5432
+      MAAS_DB_NAME: maasdb
+      MAAS_DB_USER: maas
+      MAAS_DB_PASSWORD: maaspass
+      MAAS_URL: "http://localhost:5240/MAAS/"
+      MAAS_ADMIN_USERNAME: admin
+      MAAS_ADMIN_PASSWORD: admin
+      MAAS_ADMIN_EMAIL: "admin@example.com"
+    volumes:
+      - maas-data:/var/lib/maas
+      - maas-log:/var/log/maas
+    tmpfs:
+      - /run
+      - /run/lock
+
+volumes:
+  dbdata:
+  maas-data:
+  maas-log:
+
