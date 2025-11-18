@@ -1,0 +1,16 @@
+#!/bin/bash
+# Log execution for debugging
+echo "$(date) - SYSTEMCTL MOCK CALLED BY $(whoami): $@" >> /tmp/systemctl_mock.log
+
+# If MAAS asks for 'show' OR 'status', return "active" with all required fields
+if [[ "$*" == *"show"* ]] || [[ "$*" == *"status"* ]]; then
+    echo "ActiveState=active"
+    echo "SubState=running"
+    echo "MainPID=$$"
+    echo "LoadState=loaded"
+    echo "UnitFileState=enabled"
+    exit 0
+fi
+
+# If MAAS tries to restart/reload, just return success
+exit 0
