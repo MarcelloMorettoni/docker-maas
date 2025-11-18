@@ -23,7 +23,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "5240:5240"
+      - "5240:80"
     environment:
       MAAS_DB_HOST: db
       MAAS_DB_PORT: 5432
