@@ -9,7 +9,8 @@ SERVICE="$2"
 #    - chrony: Time
 #    - maas-proxy: Squid (The one that caused the crash loop)
 #    - maas-syslog: Logging
-if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog) ]]; then
+#    - maas-http: Region API/UI (supervised separately)
+if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog|maas-http) ]]; then
     if [[ "$*" == *"show"* ]]; then
         echo "ActiveState=active"
         echo "SubState=running"
