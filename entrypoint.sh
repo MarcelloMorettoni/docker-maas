@@ -4,6 +4,11 @@ set -euo pipefail
 DB_URI="postgres://${MAAS_DB_USER}:${MAAS_DB_PASSWORD}@${MAAS_DB_HOST}:${MAAS_DB_PORT}/${MAAS_DB_NAME}"
 INIT_FLAG="/var/lib/maas/.maas-init-done"
 
+echo "Preparing runtime directories..."
+mkdir -p /run /run/lock
+chown root:maas /run/lock
+chmod 775 /run/lock
+
 echo "Waiting for PostgreSQL at ${MAAS_DB_HOST}:${MAAS_DB_PORT}..."
 export PGPASSWORD="${MAAS_DB_PASSWORD}"
 

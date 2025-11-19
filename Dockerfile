@@ -1,7 +1,8 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    MAAS_VERSION=3.3
+    MAAS_VERSION=3.3 \
+    TEMPORAL_CLI_VERSION=1.25.1
 
 # 1. Install Dependencies
 RUN apt-get update && apt-get install -y \
@@ -13,6 +14,22 @@ RUN apt-get update && apt-get install -y \
     && apt-get update \
     && apt-get install -y maas-region-controller maas-rack-controller \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 1.1 Install Temporal CLI so we can run an embedded Temporal server for MAAS
+RUN set -euo pipefail; \
+    for asset in \
+        "temporal_${TEMPORAL_CLI_VERSION}_linux_amd64.tar.gz" \
+        "temporal_${TEMPORAL_CLI_VERSION}_Linux_x86_64.tar.gz" \
+        "temporal_Linux_x86_64.tar.gz"; do \
+      url="https://github.com/temporalio/cli/releases/download/v${TEMPORAL_CLI_VERSION}/${asset}"; \
+      if curl -fsSL "$url" -o /tmp/temporal.tgz; then \
+        break; \
+      fi; \
+    done; \
+    test -f /tmp/temporal.tgz; \
+    tar -xzf /tmp/temporal.tgz -C /usr/local/bin temporal; \
+    rm -f /tmp/temporal.tgz; \
+    chmod +x /usr/local/bin/temporal
 
 # 2. Install the Mock Systemctl
 COPY mock_systemctl /usr/bin/systemctl
@@ -32,7 +49,9 @@ RUN rm -f /etc/nginx/sites-enabled/default
 # 6. Configs
 COPY supervisord.conf /etc/supervisor/conf.d/maas.conf
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY start-regiond.sh /usr/local/bin/start-regiond.sh
+COPY start-temporal.sh /usr/local/bin/start-temporal.sh
+RUN chmod +x /entrypoint.sh /usr/local/bin/start-regiond.sh /usr/local/bin/start-temporal.sh
 
 EXPOSE 5240 80
 CMD ["/entrypoint.sh"]
