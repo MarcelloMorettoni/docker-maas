@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y maas-region-controller maas-rack-controller \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Gunicorn is required to serve the MAAS Django API when maas-http is missing
+RUN pip3 install --no-cache-dir gunicorn==20.1.0
+
 # 1.1 Install Temporal CLI so we can run an embedded Temporal server for MAAS
 RUN set -euo pipefail; \
     temporal_archive="https://temporal.download/cli/archive/v${TEMPORAL_CLI_VERSION}?platform=linux&arch=amd64"; \
@@ -45,9 +48,10 @@ RUN rm -f /etc/nginx/sites-enabled/default
 # 6. Configs
 COPY supervisord.conf /etc/supervisor/conf.d/maas.conf
 COPY entrypoint.sh /entrypoint.sh
+COPY maas-http.sh /usr/sbin/maas-http
 COPY start-regiond.sh /usr/local/bin/start-regiond.sh
 COPY start-temporal.sh /usr/local/bin/start-temporal.sh
-RUN chmod +x /entrypoint.sh /usr/local/bin/start-regiond.sh /usr/local/bin/start-temporal.sh
+RUN chmod +x /entrypoint.sh /usr/local/bin/start-regiond.sh /usr/local/bin/start-temporal.sh /usr/sbin/maas-http
 
 EXPOSE 5240 80
 CMD ["/entrypoint.sh"]

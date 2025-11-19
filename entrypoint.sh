@@ -8,6 +8,9 @@ echo "Preparing runtime directories..."
 mkdir -p /run /run/lock
 chown root:maas /run/lock
 chmod 775 /run/lock
+mkdir -p /run/maas
+chown maas:maas /run/maas
+chmod 775 /run/maas
 
 echo "Waiting for PostgreSQL at ${MAAS_DB_HOST}:${MAAS_DB_PORT}..."
 export PGPASSWORD="${MAAS_DB_PASSWORD}"
