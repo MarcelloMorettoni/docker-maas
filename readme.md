@@ -9,7 +9,7 @@ Once the services settle you can reach the UI at [http://localhost:5240/MAAS/](h
 
 ### Configuration notes
 
-The container now follows the same flow documented in LogicWeb's "How to install MAAS on Ubuntu" guide: during start-up the entrypoint runs `maas init region+rack --maas-url <MAAS_URL> --database-uri <DB_URI>` before handing control to Supervisor. All of the values required by `maas init` are injected via environment variables, so you can tweak the behaviour straight from `docker-compose.yml`:
+The container now follows the same flow documented in LogicWeb's "How to install MAAS on Ubuntu" guide: during start-up the entrypoint runs `maas init` (automatically choosing the legacy positional or modern `--mode` syntax) with the proper `--maas-url` and `--database-uri` before handing control to Supervisor. All of the values required by `maas init` are injected via environment variables, so you can tweak the behaviour straight from `docker-compose.yml`:
 
 | Variable | Purpose |
 | --- | --- |
