@@ -19,16 +19,10 @@ RUN apt-get update && apt-get install -y \
 
 # 1.1 Install Temporal CLI so we can run an embedded Temporal server for MAAS
 RUN set -euo pipefail; \
-    for asset in \
-        "temporal_${TEMPORAL_CLI_VERSION}_linux_amd64.tar.gz" \
-        "temporal_${TEMPORAL_CLI_VERSION}_Linux_x86_64.tar.gz" \
-        "temporal_Linux_x86_64.tar.gz"; do \
-      url="https://github.com/temporalio/cli/releases/download/v${TEMPORAL_CLI_VERSION}/${asset}"; \
-      if curl -fsSL "$url" -o /tmp/temporal.tgz; then \
-        break; \
-      fi; \
-    done; \
-    test -f /tmp/temporal.tgz; \
+    temporal_archive="https://temporal.download/cli/archive/v${TEMPORAL_CLI_VERSION}?platform=linux&arch=amd64"; \
+    if ! curl -fsSL "$temporal_archive" -o /tmp/temporal.tgz; then \
+      curl -fsSL "https://temporal.download/cli/archive/latest?platform=linux&arch=amd64" -o /tmp/temporal.tgz; \
+    fi; \
     tar -xzf /tmp/temporal.tgz -C /usr/local/bin temporal; \
     rm -f /tmp/temporal.tgz; \
     chmod +x /usr/local/bin/temporal
