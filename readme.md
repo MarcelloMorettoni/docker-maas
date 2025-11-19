@@ -9,7 +9,7 @@ Once the services settle you can reach the UI at [http://localhost:5240/MAAS/](h
 
 ### Configuration notes
 
-The container now follows the same flow documented in LogicWeb's "How to install MAAS on Ubuntu" guide: during start-up the entrypoint runs `maas init` (automatically probing several CLI syntaxes so it works with MAAS 2.9.x through 3.x) with the proper `--maas-url` and database settings before handing control to Supervisor. All of the values required by `maas init` are injected via environment variables, so you can tweak the behaviour straight from `docker-compose.yml`:
+The container now follows the same flow documented in LogicWeb's "How to install MAAS on Ubuntu" guide: during start-up the entrypoint runs `maas init` (automatically probing several CLI syntaxes so it works with MAAS 2.9.x through 3.x) with the proper `--maas-url` and database settings before handing control to Supervisor. If Canonical releases a build where the `maas init` CLI no longer exposes database flags, the entrypoint automatically falls back to writing `/etc/maas/regiond.conf` directly from the environment variables, matching the behaviour that worked in the original revisions of this project. All of the values required by `maas init` (or the manual fallback) are injected via environment variables, so you can tweak the behaviour straight from `docker-compose.yml`:
 
 | Variable | Purpose |
 | --- | --- |

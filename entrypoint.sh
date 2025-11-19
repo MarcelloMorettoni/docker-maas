@@ -13,8 +13,24 @@ until psql "host=${MAAS_DB_HOST} port=${MAAS_DB_PORT} dbname=${MAAS_DB_NAME} use
 done
 echo "PostgreSQL is ready"
 
+provision_regiond_conf_from_env() {
+  echo "Provisioning /etc/maas/regiond.conf directly from environment..."
+  cat >/etc/maas/regiond.conf <<EOF
+database_host: "${MAAS_DB_HOST}"
+database_name: "${MAAS_DB_NAME}"
+database_user: "${MAAS_DB_USER}"
+database_pass: "${MAAS_DB_PASSWORD}"
+database_port: ${MAAS_DB_PORT}
+maas_url: "${MAAS_URL}"
+EOF
+  chown root:maas /etc/maas/regiond.conf
+  chmod 640 /etc/maas/regiond.conf
+}
+
 if [ ! -f "${INIT_FLAG}" ]; then
   echo "Running 'maas init' to mirror the LogicWeb guide..."
+  maas_init_completed=0
+  maas_init_requires_manual_config=0
 
   INIT_ARGS=(--maas-url "${MAAS_URL}" --database-uri "${DB_URI}")
   DB_SPLIT_ARGS=(
@@ -164,6 +180,7 @@ if [ ! -f "${INIT_FLAG}" ]; then
 
     if [[ ${#arg_sets_desc[@]} -eq 0 ]]; then
       echo "Unable to map any supported database flags from 'maas init --help'."
+      maas_init_requires_manual_config=1
       return 1
     fi
 
@@ -203,14 +220,32 @@ if [ ! -f "${INIT_FLAG}" ]; then
     echo "Warning: unable to execute 'maas init --help'; falling back to legacy probes."
   fi
 
-  if (( ! dynamic_maas_init_success )); then
+  if (( dynamic_maas_init_success )); then
+    maas_init_completed=1
+  fi
+
+  if (( maas_init_requires_manual_config )); then
+    echo "'maas init' CLI does not expose database flags; using legacy config file provisioning."
+    provision_regiond_conf_from_env
+    maas_init_completed=1
+  elif (( ! dynamic_maas_init_success )); then
     echo "Falling back to legacy 'maas init' invocation matrix..."
-    if ! run_legacy_maas_init_matrix; then
+    if run_legacy_maas_init_matrix; then
+      maas_init_completed=1
+    else
       echo "maas init failed for all known syntaxes"
-      exit 1
+      echo "Falling back to direct /etc/maas/regiond.conf provisioning as a last resort..."
+      provision_regiond_conf_from_env
+      maas_init_completed=1
     fi
   fi
-  touch "${INIT_FLAG}"
+
+  if (( maas_init_completed )); then
+    touch "${INIT_FLAG}"
+  else
+    echo "Unable to complete MAAS initialisation."
+    exit 1
+  fi
 else
   echo "MAAS already initialised; skipping 'maas init'"
 fi
