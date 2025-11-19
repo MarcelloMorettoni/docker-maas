@@ -4,6 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MAAS_VERSION=3.3 \
     TEMPORAL_CLI_VERSION=1.25.1
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # 1. Install Dependencies
 RUN apt-get update && apt-get install -y \
     software-properties-common \
