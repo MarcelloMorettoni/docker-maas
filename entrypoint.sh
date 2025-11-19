@@ -1,18 +1,8 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-echo "🔧 Writing /etc/maas/regiond.conf from env..."
-cat >/etc/maas/regiond.conf <<EOF
-database_host: "${MAAS_DB_HOST}"
-database_name: "${MAAS_DB_NAME}"
-database_user: "${MAAS_DB_USER}"
-database_pass: "${MAAS_DB_PASSWORD}"
-database_port: ${MAAS_DB_PORT}
-maas_url: "${MAAS_URL}"
-EOF
-
-chown root:maas /etc/maas/regiond.conf
-chmod 640 /etc/maas/regiond.conf
+DB_URI="postgres://${MAAS_DB_USER}:${MAAS_DB_PASSWORD}@${MAAS_DB_HOST}:${MAAS_DB_PORT}/${MAAS_DB_NAME}"
+INIT_FLAG="/var/lib/maas/.maas-init-done"
 
 echo "⏳ Waiting for PostgreSQL at ${MAAS_DB_HOST}:${MAAS_DB_PORT}..."
 export PGPASSWORD="${MAAS_DB_PASSWORD}"
@@ -22,6 +12,19 @@ until psql "host=${MAAS_DB_HOST} port=${MAAS_DB_PORT} dbname=${MAAS_DB_NAME} use
   sleep 2
 done
 echo "✔ PostgreSQL is ready"
+
+if [ ! -f "${INIT_FLAG}" ]; then
+  echo "📘 Running 'maas init region+rack' to mirror the LogicWeb guide..."
+  maas init region+rack \
+    --maas-url "${MAAS_URL}" \
+    --database-uri "${DB_URI}" || {
+      echo "❌ maas init failed"
+      exit 1
+    }
+  touch "${INIT_FLAG}"
+else
+  echo "ℹ️  MAAS already initialised; skipping 'maas init'"
+fi
 
 echo "⚙ Running MAAS DB migrations..."
 maas-region dbupgrade || {
