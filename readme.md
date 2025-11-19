@@ -7,6 +7,9 @@ docker logs -f maas
 
 Once the services settle you can reach the UI at [http://localhost:5240/MAAS/](http://localhost:5240/MAAS/) (defaults: `admin`/`admin`).
 
+The container ships its own Supervisor stack that now also launches the upstream `maas-http` Gunicorn service, so the API/UI stay
+reachable even though `systemd` is not present inside the image.
+
 ### Temporal workflow runtime
 
 MAAS 3.3 expects a Temporal server for its workflow engine. The container now ships with the official Temporal CLI and launches a

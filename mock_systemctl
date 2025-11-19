@@ -4,12 +4,14 @@ echo "$(date) - SYSTEMCTL MOCK CALLED BY $(whoami): $@" >> /tmp/systemctl_mock.l
 
 SERVICE="$2"
 
-# 1. Define services we MUST pretend are running
+# 1. Define services we MUST pretend are running (they are managed elsewhere)
 #    - bind9/named: DNS
 #    - chrony: Time
 #    - maas-proxy: Squid (The one that caused the crash loop)
 #    - maas-syslog: Logging
-if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog|maas-temporal|maas-workflow) ]]; then
+#    - maas-temporal / maas-workflow: Temporal sidecars
+#    - maas-http: served by Supervisor inside the container
+if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog|maas-temporal|maas-workflow|maas-http) ]]; then
     if [[ "$*" == *"show"* ]]; then
         echo "ActiveState=active"
         echo "SubState=running"
@@ -25,8 +27,7 @@ if [[ "$SERVICE" =~ ^(bind9|named|chrony|maas-proxy|maas-syslog|maas-temporal|ma
     exit 0
 fi
 
-# 2. For everything else (such as maas-http), report INACTIVE.
-#    This forces regiond to bind the socket itself instead of waiting for systemd.
+# 2. For everything else, report INACTIVE. MAAS will attempt to spawn them directly.
 if [[ "$*" == *"show"* ]]; then
     echo "ActiveState=inactive"
     echo "SubState=dead"
