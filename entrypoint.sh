@@ -17,22 +17,50 @@ if [ ! -f "${INIT_FLAG}" ]; then
   echo "Running 'maas init' to mirror the LogicWeb guide..."
 
   INIT_ARGS=(--maas-url "${MAAS_URL}" --database-uri "${DB_URI}")
+  DB_SPLIT_ARGS=(
+    --maas-url "${MAAS_URL}"
+    --database-host "${MAAS_DB_HOST}"
+    --database-port "${MAAS_DB_PORT}"
+    --database-name "${MAAS_DB_NAME}"
+    --database-user "${MAAS_DB_USER}"
+    --database-pass "${MAAS_DB_PASSWORD}"
+  )
 
-  echo "Attempting 'maas init' with --mode syntax..."
-  if INIT_OUTPUT=$(maas init --mode region+rack "${INIT_ARGS[@]}" 2>&1); then
-    printf '%s\n' "$INIT_OUTPUT"
-  else
+  attempt_maas_init() {
+    local description="$1"
+    shift
+    local -a cmd=("$@")
+
+    echo "Attempting 'maas init' (${description})..."
+    if INIT_OUTPUT=$("${cmd[@]}" 2>&1); then
+      printf '%s\n' "$INIT_OUTPUT"
+      return 0
+    fi
+
+    local status=$?
     printf '%s\n' "$INIT_OUTPUT"
     if grep -qiE 'unrecognized argument|unrecognized arguments|unknown option|unknown arguments' <<<"$INIT_OUTPUT"; then
-      echo "Detected MAAS release without --mode support; retrying legacy syntax."
-      if ! maas init region+rack "${INIT_ARGS[@]}"; then
-        echo "maas init failed"
-        exit 1
-      fi
-    else
-      echo "maas init failed"
-      exit 1
+      echo "\"${description}\" syntax not supported; trying next variant."
+      return 1
     fi
+
+    echo "'maas init' failed while using ${description} syntax (exit ${status})."
+    exit 1
+  }
+
+  if attempt_maas_init "--mode region+rack" maas init --mode region+rack "${INIT_ARGS[@]}"; then
+    :
+  elif attempt_maas_init "legacy positional region+rack" maas init region+rack "${INIT_ARGS[@]}"; then
+    :
+  elif attempt_maas_init "no positional (region+rack auto-detect)" maas init "${INIT_ARGS[@]}"; then
+    :
+  elif attempt_maas_init "split DB parameters + region+rack" maas init region+rack "${DB_SPLIT_ARGS[@]}"; then
+    :
+  elif attempt_maas_init "split DB parameters (auto mode)" maas init "${DB_SPLIT_ARGS[@]}"; then
+    :
+  else
+    echo "maas init failed for all known syntaxes"
+    exit 1
   fi
   touch "${INIT_FLAG}"
 else
