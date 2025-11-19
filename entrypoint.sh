@@ -17,17 +17,22 @@ if [ ! -f "${INIT_FLAG}" ]; then
   echo "Running 'maas init' to mirror the LogicWeb guide..."
 
   INIT_ARGS=(--maas-url "${MAAS_URL}" --database-uri "${DB_URI}")
-  if maas init --help 2>&1 | grep -q -- "--mode"; then
-    echo "Detected modern 'maas init' syntax (using --mode)."
-    INIT_CMD=(maas init --mode region+rack "${INIT_ARGS[@]}")
-  else
-    echo "Detected legacy 'maas init' syntax (positional mode)."
-    INIT_CMD=(maas init region+rack "${INIT_ARGS[@]}")
-  fi
 
-  if ! "${INIT_CMD[@]}"; then
-    echo "maas init failed"
-    exit 1
+  echo "Attempting 'maas init' with --mode syntax..."
+  if INIT_OUTPUT=$(maas init --mode region+rack "${INIT_ARGS[@]}" 2>&1); then
+    printf '%s\n' "$INIT_OUTPUT"
+  else
+    printf '%s\n' "$INIT_OUTPUT"
+    if grep -qiE 'unrecognized argument|unrecognized arguments|unknown option|unknown arguments' <<<"$INIT_OUTPUT"; then
+      echo "Detected MAAS release without --mode support; retrying legacy syntax."
+      if ! maas init region+rack "${INIT_ARGS[@]}"; then
+        echo "maas init failed"
+        exit 1
+      fi
+    else
+      echo "maas init failed"
+      exit 1
+    fi
   fi
   touch "${INIT_FLAG}"
 else
